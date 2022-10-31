@@ -1,18 +1,28 @@
 defmodule CommandedDip do
-  @moduledoc """
-  Documentation for `CommandedDip`.
-  """
+  defmacro __using__(:aggregate) do
+    quote do
+      require CommandedDip
+      import CommandedDip
+    end
+  end
 
-  @doc """
-  Hello world.
+  defmacro events(modules) do
+    for module <- modules do
+      quote do
+        def apply(%{} = aggregate, %unquote(module){} = event) do
+          apply(unquote(module), :apply, [aggregate, event])
+        end
+      end
+    end
+  end
 
-  ## Examples
-
-      iex> CommandedDip.hello()
-      :world
-
-  """
-  def hello do
-    :world
+  defmacro commands(modules) do
+    for module <- modules do
+      quote do
+        def execute(%{} = aggregate, %unquote(module){} = command) do
+          apply(unquote(module), :execute, [aggregate, command])
+        end
+      end
+    end
   end
 end
